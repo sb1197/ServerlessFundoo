@@ -1,23 +1,27 @@
 var AWS = require("aws-sdk");
 var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
 
+// const models =  require('./model')
+
 /**
  * @description: This is the simple hello lambda function that is called from api to print message on the browser
  */
-module.exports.hello = async (event) => {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify('Hello from Lambda!'),
-  };
-  return response;
-};
+// module.exports.hello = async (event) => {
+//   models.save(daat, (error, result) => {
+//     if(error){
+
+//     } else {
+
+//     }
+//   })
+// };
 
 /**
  * @description: This is the lambda function for registering user and storing user_details in the database 
  */
 module.exports.register = (event, context, callback) => {
   var table = "userData";
-  var email = "yamaha@gmail.com";
+  var email = "maya@gmail.com";
   var password = "123456789";
   var params = {
     TableName: table,
@@ -55,8 +59,10 @@ module.exports.login = async (event) => {
   
   var result =  await getUser();
   console.log("Result 2:"+JSON.stringify(result));
-  response.body = JSON.stringify(result);
+  response.body = JSON.stringify(result.Item.userEmail);
   console.log("Response:"+JSON.stringify(response));
+  // console.log("Email : ",response.Item.userEmail);
+  
   return response;
 };
 /*
@@ -97,7 +103,7 @@ function getUser() {
       TableName: table,
       Key: {
         "userEmail": {
-          S: "yamaha@gmail.com"
+          S: "maya@gmail.com"
         },
         "userPassword": {
           S: "123456789"
