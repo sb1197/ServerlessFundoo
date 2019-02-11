@@ -1,0 +1,19 @@
+Resources:
+  UserDetail:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: userData
+      AttributeDefinitions:
+        - AttributeName: userEmail
+          AttributeType: S
+        - AttributeName: userPassword
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userEmail
+          KeyType: HASH
+        - AttributeName: userPassword
+          KeyType: RANGE
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
