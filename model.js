@@ -1,74 +1,70 @@
-
-
-// // const response = {
-// //     statusCode: 200,
-// //     body: JSON.stringify('Hello from Lambda!'),
-// //   };
-// //   return response;
-
 // const bcrypt = require('bcrypt');       //Requiring Bcrypt to create hash of the user password stored in database 
-// const mongoose = require('mongoose');
 // let saltRounds = 10;
 
-// //Creating user schema using moongose
-// const UserSchema = mongoose.Schema({
-//     firstName: {
-//         type: String
-//     },
-//     lastName: {
-//         type: String
-//     },
-//     email: {
-//         type: String,
-//     },
-//     password: {
-//         type: String
-//     },
-//     is_verified: {
-//         type: Boolean,
-//         default: false
-//     },
-//     createdOn: {
-//         type: Date,
-//         default: Date.now()
-//     },
-//     updatedOn: {
-//         type: Date,
-//         default: Date.now()
-//     }
-// });
-// var user = mongoose.model('User', UserSchema);
-// function userModel() {
+var AWS = require("aws-sdk");
+var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
 
-// }
 
-// userModel.prototype.save = (data, callback) => {
-//     //Find the user by email in database if user with same email exists
-//     user.findOne({ "email": data.email }, (err, result) => {
-//         if (err) {
-//             callback(err);
-//         }
-//         else 
-//         {
-//             if (result !== null) {
-//                 callback("user already exits with this username");
-//                 console.log("result", result);
-//             }
-//             else {
-//                 //Create hash value of user password
-//                 data.password = bcrypt.hashSync(data.password, saltRounds);
-//                 var newData = new user(data);
-//                 newData.save((err, result) => {
-//                     if (err) {
-//                         callback(err);
-//                     }
-//                     else {
-//                         callback(null, result);
-//                     }
-//                 })
-//             }
-//         }
-//     });
-// }
+function userModel() {
 
-// module.exports = new userModel();
+}
+
+userModel.prototype.registerUser = (req) => {
+    console.log('Incoming Request :--', req);
+    console.log('user send email:===', req.user_email);
+    console.log('user send pass===', req.user_pass);
+    return new Promise(function (resolve, reject) {
+        var table = "userData";
+        var params = {
+            TableName: table,
+            Item: {
+                "userEmail": {
+                    S: req.user_email,
+                },
+                "userPassword": {
+                    S: req.user_pass,
+                }
+            }
+        };
+        console.log("Adding user_details...");
+        dynamodb.putItem(params, function (err, data) {
+            if (err) {
+                console.log("Error:" + err);
+                reject(err);
+            } else {
+                console.log("Result:" + JSON.stringify(data));
+                resolve(data);
+            }
+        });
+    })
+}
+
+userModel.prototype.loginUser = (req) => {
+    return new Promise(function (resolve, reject) {
+        var table = "userData";
+        var params = {
+          TableName: table,
+          Key: {
+            "userEmail": {
+              S: req.user_email,
+            },
+            "userPassword": {
+              S: req.user_pass,
+            }
+          }
+        };
+        console.log("Getting user_details...");
+    
+        dynamodb.getItem(params, function (err, data) {
+          if (err) {
+            console.log("Error:" + err);
+            reject(err);
+          } else {
+            console.log("Result:" + JSON.stringify(data));
+            resolve(data);
+          }
+        });
+      });
+}
+
+module.exports = new userModel();
