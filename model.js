@@ -3,6 +3,7 @@
 
 var AWS = require("aws-sdk");
 var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
+var utility = require('./utility/utility');
 
 
 function userModel() {
@@ -60,11 +61,26 @@ userModel.prototype.loginUser = (req) => {
             console.log("Error:" + err);
             reject(err);
           } else {
-            console.log("Result:" + JSON.stringify(data));
+            console.log("63--Result:" + JSON.stringify(data));
             resolve(data);
           }
         });
       });
+}
+
+userModel.prototype.verifyUserToken = (req) => {
+  console.log('Token to verify is---',req);
+    // verifyingUser(req,(err,data) => {
+    //   if (err) {
+    //     console.log("Error:" + err);
+    //   } 
+    //   else 
+    //   {
+    //     utility.checkToken(req)
+    //     console.log("80--Result:" + JSON.stringify(data));
+       
+    //   }
+    // })
 }
 
 module.exports = new userModel();

@@ -1,0 +1,22 @@
+{
+  "name": "serverlessfundoo",
+  "version": "1.0.0",
+  "description": "Creating Serverless Rest Api's using NodeJs and AWS Services",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sb1197/ServerlessFundoo.git"
+  },
+  "author": "Shweta Bochare",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sb1197/ServerlessFundoo/issues"
+  },
+  "homepage": "https://github.com/sb1197/ServerlessFundoo#readme",
+  "dependencies": {
+    "jsonwebtoken": "^8.4.0"
+  }
+}
