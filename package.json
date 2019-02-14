@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/sb1197/ServerlessFundoo#readme",
   "dependencies": {
-    "jsonwebtoken": "^8.4.0"
+    "jsonwebtoken": "^8.4.0",
+    "nodemailer": "^5.1.1"
   }
 }
