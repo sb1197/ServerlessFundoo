@@ -2,7 +2,7 @@
 // var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
 var model = require('./model');
 var utility = require('./utility/utility');
-var mailSent = require('./sendMail');
+// var mailSent = require('./sendMail');
 /**
  * @description: This is the simple hello lambda function that is called from api to print message on the browser
  */
@@ -42,8 +42,8 @@ module.exports.register = async (event) => {
   console.log('40--payload', payload);
   const userToken = utility.GenerateToken(payload);
   console.log('42--Token return from utility while registration :===', userToken);
-  const url = `http://localhost:3000/verifyEmail?id=${userToken.token}`;
-  mailSent.sendEMailFunction(url);
+  const url = `https://46yk5vclj7.execute-api.us-west-2.amazonaws.com/serverless/users/verifyEmail?id=${userToken.token}`;
+  // mailSent.sendEMailFunction(url);
   //Send email using this token generated
   response.body = JSON.stringify(url);
   return response;
@@ -52,7 +52,6 @@ module.exports.register = async (event) => {
 /**
  * @description: This is the login lambda function to fetch user_credentials for login from database
  */
-
 module.exports.login = async (event) => {
   var parsedParams = JSON.parse(event.body);
   console.log('Event body is---', event.body);
@@ -82,15 +81,15 @@ module.exports.login = async (event) => {
   return response;
 };
 
+/**
+ * @description: This is the verifyEmail lambda function to verify 
+ *                Registration data is requested by valid user or not.
+ */
+module.exports.verifyEmail = async (event) => {
+  console.log('Event params===',event.queryStringParameters);
+  console.log('Event params id ===',event.queryStringParameters.id);
 
-module.exports.verifyUser = async (event) => {
-  var req = {
-    headers: {
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NTAwMzk3OTIsImV4cCI6MTU1MDEyNjE5Mn0.6FPAsSRqZyFasZrJFGycY2I97l4mPW2jsCaAOfUMjJs'
-    },
-    body: ''
-  }
-  var verifyUserResult = await model.verifyUserToken(req);
+  var verifyUserResult = await model.verifyUserToken(event.queryStringParameters.id);
   console.log("Logged In User:" + JSON.stringify(verifyUserResult));
   var response = {
     statusCode: 200,
@@ -99,3 +98,28 @@ module.exports.verifyUser = async (event) => {
   return response;
 };
 
+module.exports.resetPassword = async (event) => {
+  console.log('Event body===',JSON.parse(event.body));
+  console.log('Event headers===',JSON.parse(event.headers));
+  console.log('Event params===',JSON.parse(event.params));
+  
+  var parsedParams = JSON.parse(event.body);
+  // var parsedHeaders = JSON.parse(event.headers);
+  /*
+  var req = {
+      user_email: parsedParams.email,
+      {
+        headers: {
+          token : token
+        }
+      }
+  }
+  */
+  // var verifyUserResult = await model.verifyUserToken(req);
+  // console.log("Logged In User:" + JSON.stringify(verifyUserResult));
+  // var response = {
+  //   statusCode: 200,
+  //   body: JSON.stringify({ 'msg': 'User verified successfully' }),
+  // };
+  // return response;
+};

@@ -77,11 +77,17 @@ functions:
       - http:
           path: users/login
           method: post
-  verifyUser:
-    handler: handler.verifyUser
+  verifyEmail:
+    handler: handler.verifyEmail
     events:
       - http:
-          path: users/verifyUser
+          path: 'users/verifyEmail'
+          method: post
+  resetPassword:
+    handler: handler.resetPassword
+    events:
+      - http:
+          path: users/resetPassword
           method: post
       # - cloudwatchLog: '/aws/lambda/aws-nodejs-serverless-login'    
 #    The following are a few example events you can configure

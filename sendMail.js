@@ -1,10 +1,10 @@
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 /*
 Here we are configuring our SMTP Server details.
 STMP is mail server which is responsible for sending and recieving email.
 */
-exports.sendEMailFunction = async (url) => {
-    console.log("inside sendMailFunction url is==",url);
+// exports.sendEMailFunction = async (url) => {
+//     console.log("inside sendMailFunction url is==",url);
     
     // const transporter = nodemailer.createTransport({
     //     service: 'gmail',

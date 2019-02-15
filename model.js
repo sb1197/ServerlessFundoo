@@ -11,76 +11,79 @@ function userModel() {
 }
 
 userModel.prototype.registerUser = (req) => {
-    console.log('Incoming Request :--', req);
-    console.log('user send email:===', req.user_email);
-    console.log('user send pass===', req.user_pass);
-    return new Promise(function (resolve, reject) {
-        var table = "userData";
-        var params = {
-            TableName: table,
-            Item: {
-                "userEmail": {
-                    S: req.user_email,
-                },
-                "userPassword": {
-                    S: req.user_pass,
-                }
-            }
-        };
-        console.log("Adding user_details...");
-        dynamodb.putItem(params, function (err, data) {
-            if (err) {
-                console.log("Error:" + err);
-                reject(err);
-            } else {
-                console.log("Result:" + JSON.stringify(data));
-                resolve(data);
-            }
-        });
-    })
+  console.log('Incoming Request :--', req);
+  console.log('user send email:===', req.user_email);
+  console.log('user send pass===', req.user_pass);
+  return new Promise(function (resolve, reject) {
+    var table = "userData";
+    var params = {
+      TableName: table,
+      Item: {
+        "userEmail": {
+          S: req.user_email,
+        },
+        "userPassword": {
+          S: req.user_pass,
+        }
+      }
+    };
+    console.log("Adding user_details...");
+    dynamodb.putItem(params, function (err, data) {
+      if (err) {
+        console.log("Error:" + err);
+        reject(err);
+      } else {
+        console.log("Result:" + JSON.stringify(data));
+        resolve(data);
+      }
+    });
+  })
 }
 
 userModel.prototype.loginUser = (req) => {
-    return new Promise(function (resolve, reject) {
-        var table = "userData";
-        var params = {
-          TableName: table,
-          Key: {
-            "userEmail": {
-              S: req.user_email,
-            },
-            "userPassword": {
-              S: req.user_pass,
-            }
-          }
-        };
-        console.log("Getting user_details...");
-    
-        dynamodb.getItem(params, function (err, data) {
-          if (err) {
-            console.log("Error:" + err);
-            reject(err);
-          } else {
-            console.log("63--Result:" + JSON.stringify(data));
-            resolve(data);
-          }
-        });
-      });
+  return new Promise(function (resolve, reject) {
+    var table = "userData";
+    var params = {
+      TableName: table,
+      Key: {
+        "userEmail": {
+          S: req.user_email,
+        },
+        "userPassword": {
+          S: req.user_pass,
+        }
+      }
+    };
+    console.log("Getting user_details...");
+    dynamodb.getItem(params, function (err, data) {
+      if (err) {
+        console.log("Error:" + err);
+        reject(err);
+      } else {
+        console.log("63--Result:" + JSON.stringify(data));
+        resolve(data);
+      }
+    });
+  });
 }
 
 userModel.prototype.verifyUserToken = (req) => {
-  console.log('Token to verify is---',req);
-    // verifyingUser(req,(err,data) => {
-    //   if (err) {
-    //     console.log("Error:" + err);
-    //   } 
-    //   else 
-    //   {
-    //     utility.checkToken(req)
-    //     console.log("80--Result:" + JSON.stringify(data));
-       
-    //   }
-    // })
+  var request = {
+    headers : req
+  }
+  console.log('Token to verify is---', request);
+  return new Promise(function (resolve, reject) {
+    utility.checkToken(request, (err, data) => {
+      if (err) {
+        console.log("Error:" + err);
+        reject(err);
+      }
+      else {
+        console.log("82--Decoded Result:" + JSON.stringify(data));
+        resolve(data);
+      }
+    })
+  })
 }
 
 module.exports = new userModel();
