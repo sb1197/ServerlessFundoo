@@ -5,7 +5,6 @@ var AWS = require("aws-sdk");
 var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
 var utility = require('./utility/utility');
 
-
 function userModel() {
 
 }
@@ -15,7 +14,7 @@ userModel.prototype.registerUser = (req) => {
   console.log('user send email:===', req.user_email);
   console.log('user send pass===', req.user_pass);
   return new Promise(function (resolve, reject) {
-    var table = "userData";
+    var table = "userDetail";
     var params = {
       TableName: table,
       Item: {
@@ -42,19 +41,21 @@ userModel.prototype.registerUser = (req) => {
 
 userModel.prototype.loginUser = (req) => {
   return new Promise(function (resolve, reject) {
-    var table = "userData";
+    var table = "userDetail";
     var params = {
       TableName: table,
       Key: {
         "userEmail": {
           S: req.user_email,
         },
-        "userPassword": {
-          S: req.user_pass,
-        }
+        // "userPassword": {
+        //   S: req.user_pass,
+        // }
       }
     };
     console.log("Getting user_details...");
+    console.log('user email in model===', req.user_email);
+    console.log('user password in model===', req.user_pass);
     dynamodb.getItem(params, function (err, data) {
       if (err) {
         console.log("Error:" + err);
@@ -69,7 +70,7 @@ userModel.prototype.loginUser = (req) => {
 
 userModel.prototype.verifyUserToken = (req) => {
   var request = {
-    headers : req
+    headers: req
   }
   console.log('Token to verify is---', request);
   return new Promise(function (resolve, reject) {
@@ -85,5 +86,58 @@ userModel.prototype.verifyUserToken = (req) => {
     })
   })
 }
+
+userModel.prototype.updatePassword = (req) => {
+  console.log("90---model----req : ", req);
+  return new Promise(function (resolve, reject) {
+    var table = "userDetail";
+    var params = {
+      TableName: table,
+      Key: {
+        "userEmail": {
+          S: req.result.payload,
+        },
+      },
+      ExpressionAttributeValues: {
+        ":p": {
+          S: req.userPassword
+        }
+      },
+      UpdateExpression: "SET userPassword = :p",
+      ReturnValues: "ALL_NEW"
+    };
+    console.log("131---model--update password");
+    dynamodb.updateItem(params, function (err, data) {
+      if (err) {
+        console.log("error : ", err);
+        reject(err);
+      }
+      else {
+        console.log(JSON.stringify(data, null, 2));
+        resolve(data);
+      }
+    });
+  });
+};
+
+userModel.prototype.getUsers = () => {
+  return new Promise(function (resolve, reject) {
+    var table = "userDetail";
+    var params = {
+      TableName: table
+    };
+    dynamodb.scan(params, function (err, data) {
+      if (err) {
+        console.log("error : ", err);
+        reject(err);
+      }
+      else {
+        console.log(JSON.stringify(data));
+        resolve(data);
+      }
+    });
+  });
+}
+
 
 module.exports = new userModel();

@@ -15,6 +15,8 @@ module.exports = {
         console.log('51--req body in utility--',req.headers);
         // console.log('52--req `headers` in utility--',req.headers['token']);
         var token1 = req.headers; 
+        console.log('token 1 value :',token1);
+        
         // decode token
         if (token1)
         {

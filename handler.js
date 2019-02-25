@@ -1,8 +1,6 @@
-// var AWS = require("aws-sdk");
-// var dynamodb = new AWS.DynamoDB({ region: "us-west-2", apiVersion: "2012-08-10" });
 var model = require('./model');
 var utility = require('./utility/utility');
-// var mailSent = require('./sendMail');
+
 /**
  * @description: This is the simple hello lambda function that is called from api to print message on the browser
  */
@@ -20,7 +18,6 @@ module.exports.hello = async (event) => {
  */
 module.exports.register = async (event) => {
   var parsedParams = JSON.parse(event.body);
-
   var email = parsedParams.userEmail;
   var password = parsedParams.userPassword;
   var req = {
@@ -42,9 +39,7 @@ module.exports.register = async (event) => {
   console.log('40--payload', payload);
   const userToken = utility.GenerateToken(payload);
   console.log('42--Token return from utility while registration :===', userToken);
-  const url = `https://46yk5vclj7.execute-api.us-west-2.amazonaws.com/serverless/users/verifyEmail?id=${userToken.token}`;
-  // mailSent.sendEMailFunction(url);
-  //Send email using this token generated
+  const url = `https://4pnr7j9868.execute-api.us-west-2.amazonaws.com/serverless/users/verifyEmail?id=${userToken.token}`;
   response.body = JSON.stringify(url);
   return response;
 };
@@ -86,8 +81,8 @@ module.exports.login = async (event) => {
  *                Registration data is requested by valid user or not.
  */
 module.exports.verifyEmail = async (event) => {
-  console.log('Event params===',event.queryStringParameters);
-  console.log('Event params id ===',event.queryStringParameters.id);
+  console.log('Event params===', event.queryStringParameters);
+  console.log('Event params id ===', event.queryStringParameters.id);
 
   var verifyUserResult = await model.verifyUserToken(event.queryStringParameters.id);
   console.log("Logged In User:" + JSON.stringify(verifyUserResult));
@@ -98,28 +93,104 @@ module.exports.verifyEmail = async (event) => {
   return response;
 };
 
+/**
+* @description: This is the lambda function for forget pssword it take user email 
+*/
+module.exports.forgetPassword = async (event) => {
+  console.log("event in forget password : ", event);
+  // to convert text into a JavaScript object
+  var parseParam = JSON.parse(event.body);
+  console.log("event email is: ", parseParam.userEmail);
+  var response = {
+    statusCode: 200,
+    body: JSON.stringify({ 'msg': 'success' }),
+  };
+  const payload = parseParam.userEmail;
+  console.log('Payload is at forget pass====', payload);
+  const jwtToken = utility.GenerateToken(payload);
+  console.log("125---handler----", jwtToken.token);
+  const url = `https://4pnr7j9868.execute-api.us-west-2.amazonaws.com/serverless/users/resetPassword?id=${jwtToken.token}`;
+  console.log("url is: ", url);
+  //converts a JavaScript object or value to a JSON string
+  response.body = JSON.stringify(url);
+  return response;
+}
+
+/**
+* @description: This is the lambda function for reset password 
+*/
 module.exports.resetPassword = async (event) => {
-  console.log('Event body===',JSON.parse(event.body));
-  console.log('Event headers===',JSON.parse(event.headers));
-  console.log('Event params===',JSON.parse(event.params));
-  
-  var parsedParams = JSON.parse(event.body);
-  // var parsedHeaders = JSON.parse(event.headers);
-  /*
+  console.log("event is reset password :", event);
+  console.log("token in query : ", event.queryStringParameters.id);
+  var result = await model.verifyUserToken(event.queryStringParameters.id);
+  console.log("logged in user for reset password: ", JSON.stringify(result));
+  var parseParam = JSON.parse(event.body);
+  userPassword = parseParam.userPassword;
   var req = {
-      user_email: parsedParams.email,
-      {
-        headers: {
-          token : token
-        }
-      }
+    "userPassword": userPassword,
+    "result": result
   }
-  */
-  // var verifyUserResult = await model.verifyUserToken(req);
-  // console.log("Logged In User:" + JSON.stringify(verifyUserResult));
-  // var response = {
-  //   statusCode: 200,
-  //   body: JSON.stringify({ 'msg': 'User verified successfully' }),
-  // };
-  // return response;
+  var resultNewPassword = await model.updatePassword(req);
+  console.log("new password in result body : ", resultNewPassword);
+  var response = {
+    statusCode: 200,
+    body: JSON.stringify({ 'msg': 'successfully reset password' }),
+  };
+  return response;
+}
+
+module.exports.getUsers = async (event) => {
+  console.log("event is :", event);
+  var resultOfUser = await model.getUsers();
+  console.log("150---handler---Result :" + JSON.stringify(resultOfUser));
+  var response = {
+    statusCode: 200,
+    body: JSON.stringify({ 'msg': 'success' }),
+  };
+  response.body = JSON.stringify(resultOfUser);
+  return response;
+}
+
+module.exports.authFunction = function (event, context, callback) {
+  console.log("216---handler---req : ", event.authorizationToken);
+  
+  
+  var result = model.verifyUserToken(event.authorizationToken);
+  console.log('decoded token in result',result);
+  
+  switch (event.authorizationToken) 
+  {
+    case 'allow':
+      callback(null, generatePolicy('user', 'Allow', event.methodArn));
+      break;
+    case 'deny':
+      callback(null, generatePolicy('user', 'Deny', event.methodArn));
+      break;
+    case 'unauthorized':
+      callback("Unauthorized"); // Return a 401 Unauthorized response
+      break;
+    default:
+      callback("Error: Invalid token");
+  }
 };
+
+// Help function to generate an IAM policy
+var generatePolicy = function (principalId, effect, resource) {
+  var authResponse = {};
+
+  authResponse.principalId = principalId;
+  if (effect && resource) {
+    var policyDocument = {};
+    policyDocument.Version = '2012-10-17';
+    policyDocument.Statement = [];
+    var statementOne = {};
+    statementOne.Action = 'execute-api:Invoke';
+    statementOne.Effect = effect;
+    statementOne.Resource = resource;
+    policyDocument.Statement[0] = statementOne;
+    authResponse.policyDocument = policyDocument;
+  }
+  
+  return authResponse;
+};
+

@@ -37,7 +37,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:us-west-2:362899290975:table/userData"
+      Resource: "arn:aws:dynamodb:us-west-2:938088840408:table/userDetail"
         # - "Fn::GetAtt": [ UserDetail , userEmail ]
       # 
 #        Fn::Join:
@@ -46,9 +46,7 @@ provider:
 #            - "Ref" : "ServerlessDeploymentBucket"
 #            - "/*"
 
-# you can define service wide environment variables here
-  
-
+# you can define service wide environment variables here 
 # you can add packaging information here
 #package:
 #  include:
@@ -77,6 +75,7 @@ functions:
       - http:
           path: users/login
           method: post
+          cors: true      
   verifyEmail:
     handler: handler.verifyEmail
     events:
@@ -89,6 +88,22 @@ functions:
       - http:
           path: users/resetPassword
           method: post
+  forgetPassword:
+    handler: handler.forgetPassword
+    events:
+      - http:
+          path: users/forgetPassword
+          method: post
+  getUserDetails:
+    handler: handler.getUsers
+    events:
+      - http:
+          path: users/getUsers
+          method: get
+          cors: true
+          authorizer: authorizerFunct
+  authorizerFunct:
+    handler: handler.authFunction
       # - cloudwatchLog: '/aws/lambda/aws-nodejs-serverless-login'    
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
